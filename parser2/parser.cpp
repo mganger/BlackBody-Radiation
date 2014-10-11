@@ -128,7 +128,7 @@ class PowerDensity {
 
 		long double getWavelength(){return wavelength * 1e9;}
 		double getTemp(){return temperature;}
-		long double getDensity(){return density * 1e9;}
+		long double getDensity(){return density / 1e9;}
 };
 
 
@@ -363,8 +363,4 @@ int main(int argc, char ** argv){
 		outputFile << data[j].getWavelength() << ';';
 		outputFile << data[j].getPower() << endl;
 	}
-
-	//test
-	cout << "=================" << endl;
-	PowerDensity test(330, 2500);
 }
