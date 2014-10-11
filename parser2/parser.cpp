@@ -313,15 +313,15 @@ vector<string> toStringArray(int argc, char ** argv){
 
 int main(int argc, char ** argv){
 	vector<string> args = toStringArray(argc, argv);
-	if(args.size() != 8){
+	if(args.size() != 9){
 		cout << "Wrong number of arguments" << endl;
-		cout << "input output samples timeRange voltage current resistance temperature" << endl;
+		cout << "input output samples timeRange voltage current resistance temperature slope" << endl;
 		exit(1);
 	}
 
-	Calibration::setSlope(-1.2);
-	Wavelength::setA(13900);
-	Wavelength::setB(1.689);
+	Calibration::setSlope(atof(args[8].c_str()));
+	Wavelength::setA(13900.0L);
+	Wavelength::setB(1.689L);
 
 	//take the input file
 	InputFile rawFile(args[0]);
