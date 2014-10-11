@@ -3,6 +3,10 @@
 #include <math.h>
 #include <iostream>
 #include <vector>
+#include <fstream>
+#include <string>
+
+using namespace std;
 
 class Calibration {
 	public:
@@ -69,19 +73,82 @@ class DataPoint : protected Calibration, public Wavelength {
 };
 
 
+class InputFile {
+	private:
+		ifstream file;
+		vector<DataPoint> pointArray;
+	protected:
+		void fileToArray(){
+			//clear the array, go to the beginning of the file
+			pointArray.clear();
+			file.seekg(0, file.beg);
+
+			//remove the first line
+			string tmp;
+			getline(file, tmp);
+
+			//put the rest of the lines into strings, and construct new objects
+			for(;;){
+				string time,voltage,angle,junk;
+				getline(file, time, ',');
+				getline(file, voltage, ',');
+				getline(file, angle, ',');
+				getline(file, junk);
+
+				//break if any of the strings are empty (end of file)
+				if(isEmpty(time) || isEmpty(voltage) || isEmpty(angle)) break;
+
+				pointArray.emplace_back(toDouble(time), toDouble(voltage), toDouble(angle));
+			}
+		}
+
+		//helper methods
+		bool isEmpty(string& input){
+			return input.length() == 0;
+		}
+		double toDouble(string& input){
+			return atof(input.c_str());
+		}
+	public:
+		InputFile(char * filename){
+			file.open(filename);
+			fileToArray();
+		}
+		InputFile(string filename){
+			file.open(filename.c_str());
+			fileToArray();
+		}
+		~InputFile(){
+			file.close();
+		}
+
+		vector<DataPoint>& getPointArray(){return pointArray;}
+};
 
 
-using namespace std;
+vector<string> toStringArray(int argc, char ** argv){
+	vector<string> output;
+	for(int i = 1; i < argc; i++){
+		output.emplace_back(argv[i]);
+	}
+	return output;
+}
+
 
 int main(int argc, char ** argv){
+	vector<string> args = toStringArray(argc, argv);
+
 	Calibration::setSlope(1.2);
 	Wavelength::setA(13900);
 	Wavelength::setB(1.689);
 
-	DataPoint testPoint(0.1234, 0.948, 50);
+	InputFile testFile(args[0]);
 
-	cout << "Time:       " << testPoint.getTime() << endl;
-	cout << "Voltage:    " << testPoint.getPotential() << endl;
-	cout << "Angle:      " << testPoint.getAngle() << endl;
-	cout << "Wavelength: " << testPoint.getWavelength() << endl;
+	vector<DataPoint> data = testFile.getPointArray();
+
+	cout << data.size() << endl;
+	cout << data[0].getTime() << endl;
+	cout << data[0].getPotential() << endl;
+	cout << data[0].getAngle() << endl;
+	cout << data[0].getWavelength() << endl;
 }
