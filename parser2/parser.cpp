@@ -87,24 +87,32 @@ class TempCalibration {
 			maximum = maxDataPoint(input, sampleSize);
 			baseline = findBaseline(input, timeRange);
 			maxPower = targetPower;
-			cout << "Max:    " << maximum << endl;
-			cout << "base:   " << baseline << endl;
-			cout << "target: " << targetPower << endl;
+			cout << targetPower * 2 << " point moving average" << endl;
+			cout << "Max:    " << maximum << " V" << endl;
+			cout << "base:   " << baseline << " V" << endl;
+			cout << "target: " << targetPower << " W/m" << endl;
 		}
 
 		//needs to get the baseline for the measurement, and then find the max temperature
 		double maxDataPoint(vector<DataPoint>& input, int sampleSize){
 			int size = input.size();
 			double max = input[0].getPotential();
+			double peak = 0;
 			for(int i = 1; i < size; i++){
 				double average = 0;
+				int count = 0;
 				//sum the numbers
-				for(int j = i - sampleSize && j >= 0; j < i + sampleSize && j < size; j++){
+				for(int j = i - sampleSize; j >= 0 && j < i + sampleSize && j < size; j++){
 					average += input[j].getPotential();
+					count++;
 				}
-				average /= (sampleSize * 2.0);
-				if(average > max) max = average;
+				average /= (count);
+				if(average > max){
+					max = average;
+					peak = input[i].getWavelength();
+				}
 			}
+			cout << "Peak Wavelength: " << peak << " nm" << endl;
 			return max;
 		}
 		double findBaseline(vector<DataPoint>& input, double timeRange){
@@ -213,12 +221,15 @@ int main(int argc, char ** argv){
 
 	//calibrate points
 	int sampleSize = atoi(args[2].c_str());
+	if(sampleSize <=0) sampleSize = 1;
 	double timeRange = atof(args[3].c_str());
 	double targetPower = atof(args[4].c_str());
-	TempCalibration tempCal(data, 10, 10, 100);
+	TempCalibration tempCal(data, sampleSize, timeRange, targetPower);
 	tempCal.calibrateDataPoints(data);
 
 	//output the file
+	cout << endl << "Outputting to file in form:" << endl;
+	cout << "Time(s); Voltage(V); CalibratedAngle(°); Wavelength(nm); Intensity(W/m)" << endl;
 	int size = data.size();
 	for(int j = 0; j < size; j++){
 		outputFile << data[j].getTime() << ';';
