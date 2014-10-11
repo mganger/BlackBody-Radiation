@@ -54,6 +54,7 @@ class DataPoint : protected Calibration, public Wavelength {
 		double rawAngle;
 		double calAngle;
 		double wavelength;
+		double power;
 
 
 	public:
@@ -70,6 +71,60 @@ class DataPoint : protected Calibration, public Wavelength {
 		double getPotential(){return potential;}
 		double getAngle(){return calAngle;}
 		double getWavelength(){return wavelength;}
+		double getPower(){return power;}
+		double setPower(double input){power = input;}
+};
+
+//this class handles the specific calibration of temperature data
+class TempCalibration {
+	private:
+		double maximum;
+		double baseline;
+		double maxPower;
+
+	public:
+		TempCalibration(vector<DataPoint>& input, int sampleSize, double timeRange, double targetPower){
+			maximum = maxDataPoint(input, sampleSize);
+			baseline = findBaseline(input, timeRange);
+			maxPower = targetPower;
+		}
+
+		//needs to get the baseline for the measurement, and then find the max temperature
+		double maxDataPoint(vector<DataPoint>& input, int sampleSize){
+			int size = input.size();
+			double max = input[0].getPotential();
+			for(int i = 1; i < size; i++){
+				double average = 0;
+				//sum the numbers
+				for(int j = i - sampleSize && j >= 0; j < i + sampleSize && j < size; j++){
+					average += input[j].getPotential();
+				}
+				average /= (sampleSize * 2.0);
+				if(average > max) max = average;
+			}
+			return max;
+		}
+		double findBaseline(vector<DataPoint>& input, double timeRange){
+			double sum = 0;
+			unsigned long int count = 0;
+			int size = input.size();
+			for(int i = 0; i < size; i++){
+				if(input[i].getTime() > timeRange) break;
+				sum += input[i].getPotential();
+				count++;
+			}
+			if(count == 0) return 0;
+			return sum / count;
+		}
+
+		//linear calibration, p=0 @ baseline and p = maxPower @ maximum
+		void calibrateDataPoints(vector<DataPoint>& input){
+			int size = input.size();
+			double slope = maxPower / (maximum - baseline);
+			for(int i = 0; i < size; i++){
+				input[i].setPower((input[i].getPotential() - baseline) * slope);
+			}
+		}
 };
 
 
@@ -126,6 +181,7 @@ class InputFile {
 };
 
 
+
 vector<string> toStringArray(int argc, char ** argv){
 	vector<string> output;
 	for(int i = 1; i < argc; i++){
@@ -137,22 +193,35 @@ vector<string> toStringArray(int argc, char ** argv){
 
 int main(int argc, char ** argv){
 	vector<string> args = toStringArray(argc, argv);
+	if(args.size() != 5){
+		cout << "Wrong number of arguments" << endl;
+		cout << "input output samples timeRange targetPower" << endl;
+		exit(1);
+	}
 
 	Calibration::setSlope(-1.2);
 	Wavelength::setA(13900);
 	Wavelength::setB(1.689);
 
-	//take the oldfiles, make new files
-	for(int i = 0; i < args.size(); i++){
-		InputFile rawFile(args[i]);
-		ofstream outputFile(args[i] + "adjusted.csv", ios::trunc);
-		vector<DataPoint> data = rawFile.getPointArray();
-		int size = data.size();
-		for(int j = 0; j < size; j++){
-			outputFile << data[j].getTime() << ';';
-			outputFile << data[j].getPotential() << ';';
-			outputFile << data[j].getAngle() << ';';
-			outputFile << data[j].getWavelength() << endl;
-		}
+	//take the input file
+	InputFile rawFile(args[0]);
+	ofstream outputFile(args[1], ios::trunc);
+	vector<DataPoint> data = rawFile.getPointArray();
+
+	//calibrate points
+	int sampleSize = atoi(args[2].c_str());
+	double timeRange = atof(args[3].c_str());
+	double targetPower = atof(args[4].c_str());
+	TempCalibration tempCal(data, 10, 10, 100);
+	tempCal.calibrateDataPoints(data);
+
+	//output the file
+	int size = data.size();
+	for(int j = 0; j < size; j++){
+		outputFile << data[j].getTime() << ';';
+		outputFile << data[j].getPotential() << ';';
+		outputFile << data[j].getAngle() << ';';
+		outputFile << data[j].getWavelength() << ';';
+		outputFile << data[j].getPower() << endl;
 	}
 }
