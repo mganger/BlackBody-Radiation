@@ -87,6 +87,9 @@ class TempCalibration {
 			maximum = maxDataPoint(input, sampleSize);
 			baseline = findBaseline(input, timeRange);
 			maxPower = targetPower;
+			cout << "Max:    " << maximum << endl;
+			cout << "base:   " << baseline << endl;
+			cout << "target: " << targetPower << endl;
 		}
 
 		//needs to get the baseline for the measurement, and then find the max temperature
