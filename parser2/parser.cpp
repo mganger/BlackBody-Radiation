@@ -138,17 +138,21 @@ vector<string> toStringArray(int argc, char ** argv){
 int main(int argc, char ** argv){
 	vector<string> args = toStringArray(argc, argv);
 
-	Calibration::setSlope(1.2);
+	Calibration::setSlope(-1.2);
 	Wavelength::setA(13900);
 	Wavelength::setB(1.689);
 
-	InputFile testFile(args[0]);
-
-	vector<DataPoint> data = testFile.getPointArray();
-
-	cout << data.size() << endl;
-	cout << data[0].getTime() << endl;
-	cout << data[0].getPotential() << endl;
-	cout << data[0].getAngle() << endl;
-	cout << data[0].getWavelength() << endl;
+	//take the oldfiles, make new files
+	for(int i = 0; i < args.size(); i++){
+		InputFile rawFile(args[i]);
+		ofstream outputFile(args[i] + "adjusted.csv", ios::trunc);
+		vector<DataPoint> data = rawFile.getPointArray();
+		int size = data.size();
+		for(int j = 0; j < size; j++){
+			outputFile << data[j].getTime() << ';';
+			outputFile << data[j].getPotential() << ';';
+			outputFile << data[j].getAngle() << ';';
+			outputFile << data[j].getWavelength() << endl;
+		}
+	}
 }
