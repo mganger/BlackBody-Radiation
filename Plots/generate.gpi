@@ -1,21 +1,37 @@
 set datafile separator ';'
-set xlabel "Intensity"
-set ylabel "Wavelength"
-set terminal png
-set output "10Vtrial9.png"
-plot "../Adjusted/10Vtrial9.csvadjusted.csv" using 2:4
-set output "5Vtrial1.png"
-plot "../Adjusted/5Vtrial1.csvadjusted.csv" using 2:4
-set output "5Vtrial2.png"
-plot "../Adjusted/5Vtrial2.csvadjusted.csv" using 2:4
-set output "5Vtrial4.png"
-plot "../Adjusted/5Vtrial4.csvadjusted.csv" using 2:4
-set output "6Vtrial3.png"
-plot "../Adjusted/6Vtrial3.csvadjusted.csv" using 2:4
-set output "7Vtrial6.png"
-plot "../Adjusted/7Vtrial6.csvadjusted.csv" using 2:4
-set output "8Vtrial7.png"
-plot "../Adjusted/8Vtrial7.csvadjusted.csv" using 2:4
-set output "9Vtrial8.png"
-plot "../Adjusted/9Vtrial8.csvadjusted.csv" using 2:4
-set xlabel "Intensity"
+set ylabel "Intensity"
+set xlabel "Wavelength"
+set terminal pdf size 10.5, 8
+set xrange [275:400]
+
+set output "10Vtrial9.pdf"
+plot "../Adjusted/10Vtrial9.csvadjusted.csv" using 4:2
+unset output
+set output "5Vtrial1.pdf"
+
+plot "../Adjusted/5Vtrial1.csvadjusted.csv" using 4:2
+unset output
+
+set output "5Vtrial2.pdf"
+plot "../Adjusted/5Vtrial2.csvadjusted.csv" using 4:2
+unset output
+
+set output "5Vtrial4.pdf"
+plot "../Adjusted/5Vtrial4.csvadjusted.csv" using 4:2
+unset output
+
+set output "6Vtrial3.pdf"
+plot "../Adjusted/6Vtrial3.csvadjusted.csv" using 4:2
+unset output
+
+set output "7Vtrial6.pdf"
+plot "../Adjusted/7Vtrial6.csvadjusted.csv" using 4:2
+unset output
+
+set output "8Vtrial7.pdf"
+plot "../Adjusted/8Vtrial7.csvadjusted.csv" using 4:2
+unset output
+
+set output "9Vtrial8.pdf"
+plot "../Adjusted/9Vtrial8.csvadjusted.csv" using 4:2
+unset output
