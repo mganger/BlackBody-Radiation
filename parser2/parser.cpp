@@ -6,11 +6,13 @@
 #include <fstream>
 #include <string>
 #include <boost/multiprecision/cpp_dec_float.hpp>
+#include "Measurement.hpp"
 
 using namespace std;
 using namespace boost::multiprecision;
 
 typedef cpp_dec_float_50 BigFloat;
+typedef Measurement< BigFloat > BigMeasure;
 
 class Calibration {
 	public:
