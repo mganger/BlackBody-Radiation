@@ -10,7 +10,7 @@
 using namespace std;
 using namespace boost::multiprecision;
 
-typedef cpp_dec_float_100 BigFloat;
+typedef cpp_dec_float_50 BigFloat;
 
 class Calibration {
 	public:
