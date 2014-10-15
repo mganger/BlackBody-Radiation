@@ -70,6 +70,29 @@ class Measurement {
 			Measurement<T> output(outN, outU);
 			return output;
 		}
+
+
+
+
+		//addition, subtraction for +=
+		Measurement<T>& operator+=(Measurement<T> input){
+			*this = *this + input;
+			return *this;
+		}
+		Measurement<T>& operator-=(Measurement<T> input){
+			*this = *this - input;
+			return *this;
+		}
+
+		//multiplication, division
+		Measurement<T>& operator*=(Measurement<T> input){
+			*this = *this * input;
+			return *this;
+		}
+		Measurement<T>& operator/=(Measurement<T> input){
+			*this = *this / input;
+			return *this;
+		}
 };
 
 //=======================================================================================
@@ -208,6 +231,7 @@ Measurement<T> atanh(Measurement<T> input){
 template <class T>
 std::ostream& operator<<(std::ostream& os, Measurement<T> ms){
 	os << ms.getNumber() << " ± " << ms.getUncert();
+	return os;
 }
 
 #endif
