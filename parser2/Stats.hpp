@@ -1,6 +1,8 @@
 //this header is supposed to simplify standard deviations
+#ifndef STATS_HPP
+#define STATS_HPP
 
-#include "Measurement.hpp"
+#include "Measurement-Type/Measurement.hpp"
 #include <vector>
 
 template<class T>
@@ -32,3 +34,5 @@ class Mean : public std::vector<T> {
 			return Measurement<T>(this->mean(), this->uncertainty());
 		}
 };
+
+#endif
