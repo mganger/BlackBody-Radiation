@@ -6,7 +6,8 @@
 #include <fstream>
 #include <string>
 #include <boost/multiprecision/cpp_dec_float.hpp>
-#include "Measurement.hpp"
+#include "Measurement-Type/Measurement.hpp"
+#include "Stats.hpp"
 
 using namespace std;
 using namespace boost::multiprecision;
@@ -14,111 +15,122 @@ using namespace boost::multiprecision;
 typedef cpp_dec_float_50 BigFloat;
 typedef Measurement< BigFloat > BigMeasure;
 
-class Calibration {
+template <class T>
+class AngleCalibration {
 	public:
-		static void setSlope(BigFloat inputSlope){slope = inputSlope;}
-		BigFloat calibrate(BigFloat input){
+		static void setSlope(T inputSlope){slope = inputSlope;}
+		static T calibrate(T input){
 			return input*slope;
 		}
 	protected:
-		static BigFloat slope;
+		static T slope;
 };
-BigFloat Calibration::slope = 1;
+template <class T> T AngleCalibration<T>::slope = 1;
 
 
 
 
+template <class T>
 class Wavelength {
 	private:
-		static BigFloat A;
-		static BigFloat B;
+		static T A;
+		static T B;
 
 	protected:
 		//methods
-		BigFloat n(BigFloat theta){
-			BigFloat squared = 2.0/sqrt(3) * sin(toRadians(theta)) + 1.0/2.0;
+		static T n(T theta){
+			T squared = 2.0/sqrt(3) * sin(toRadians(theta)) + 1.0/2.0;
 			return sqrt(squared*squared + 3.0/4.0);
 		}
-		BigFloat toRadians(BigFloat degrees){return degrees * atan(1)*4 / 180.0;}
-		BigFloat toWavelength(BigFloat theta){
+		static T toRadians(T degrees){return degrees * atan(1)*4 / 180.0;}
+		static T toWavelength(T theta){
 			return sqrt(A / (n(theta) - B));
 		}
 	public:
-		static void setA(BigFloat inputA){A = inputA;}
-		static void setB(BigFloat inputB){B = inputB;}
+		static void setA(T inputA){A = inputA;}
+		static void setB(T inputB){B = inputB;}
 };
-BigFloat Wavelength::A = 1;
-BigFloat Wavelength::B = 1;
+template <class T> T Wavelength<T>::A = 1;
+template <class T> T Wavelength<T>::B = 1;
 
 
 
 
-class DataPoint : protected Calibration, public Wavelength {
+template <class T>
+class DataPoint : protected AngleCalibration<T>, public Wavelength<T> {
 	private:
-		BigFloat time;
-		BigFloat potential;
-		BigFloat rawAngle;
-		BigFloat calAngle;
-		BigFloat wavelength;
-		BigFloat power;
+		T time;
+		T potential;
+		T rawAngle;
+		T calAngle;
+		T wavelength;
+		T power;
 
 
 	public:
 		//constructor
-		DataPoint(BigFloat inputTime, BigFloat inputPotential, BigFloat inputAngle){
+		DataPoint(T inputTime, T inputPotential, T inputAngle){
 			time = inputTime;
 			potential = inputPotential;
 			rawAngle = inputAngle;
-			calAngle = calibrate(inputAngle);
-			wavelength = toWavelength(calAngle);
+			calAngle = AngleCalibration<T>::calibrate(inputAngle);
+			wavelength = Wavelength<T>::toWavelength(calAngle);
 		}
 
-		BigFloat getTime(){return time;}
-		BigFloat getPotential(){return potential;}
-		BigFloat getAngle(){return calAngle;}
-		BigFloat getWavelength(){return wavelength;}
-		BigFloat getPower(){return power;}
-		BigFloat setPower(BigFloat input){power = input;}
+		T getTime(){return time;}
+		T getPotential(){return potential;}
+		T getAngle(){return calAngle;}
+		T getWavelength(){return wavelength;}
+		T getPower(){return power;}
+		void setPower(T input){power = input;}
 };
 
+template <class T>
 class StefanBoltzmann {
 	public:
-		static BigFloat sigma;
-		static BigFloat intensity(BigFloat temp){return sigma * pow(temp, 4);}
+		static T sigma;
+		static T intensity(T temp){return sigma * pow(temp, 4);}
 };
 
-BigFloat StefanBoltzmann::sigma(5.67e-8);
+template <class T> T StefanBoltzmann<T>::sigma(5.67e-8);
 
+
+
+
+template <class T>
 class WiensLaw {
 	private:
-		BigFloat wConst = 2.89776829;
-		BigFloat temperature;
-		BigFloat wavelength;
+		T wConst = 2.89776829;
+		T temperature;
+		T wavelength;
 
 	public:
 		WiensLaw(){};
-		WiensLaw(BigFloat temp){
+		WiensLaw(T temp){
 			temperature = temp;
 			wavelength = wConst / temp;
 		}
-		BigFloat getTemp(){return temperature;}
-		BigFloat getWavelength(){return wavelength;}
-
+		T getTemp(){return temperature;}
+		T getWavelength(){return wavelength;}
 };
 
+
+
+
+template <class T>
 class PowerDensity {
 	private:
-		BigFloat pi = M_PI;
-		BigFloat h = 6.626e-34L;
-		BigFloat k = 5.67e-8L;
-		BigFloat c = 3e8L;
+		T pi = M_PI;
+		T h = 6.626e-34L;
+		T k = 5.67e-8L;
+		T c = 3e8L;
 
-		BigFloat wavelength;
-		BigFloat temperature;
-		BigFloat density;
+		T wavelength;
+		T temperature;
+		T density;
 
-		BigFloat densityCalc(){
-			BigFloat num, denum;
+		T densityCalc(){
+			T num, denum;
 			num = 2 * pi * h * c*c;
 			denum = pow(wavelength, 5) * (exp((h*c) / (wavelength * k * temperature)) - 1);
 			cout << "num:   " <<  num << endl;
@@ -126,33 +138,34 @@ class PowerDensity {
 			return num / denum;
 		}
 	public:
-		PowerDensity(BigFloat inputWavelength, BigFloat inputTemperature){
+		PowerDensity(T inputWavelength, T inputTemperature){
 			wavelength = inputWavelength * 1e-9;
 			temperature= inputTemperature;
 			density = densityCalc();
 		}
 
-		BigFloat getWavelength(){return wavelength * 1e9;}
-		BigFloat getTemp(){return temperature;}
-		BigFloat getDensity(){return density / 1e9;}
+		T getWavelength(){return wavelength * 1e9;}
+		T getTemp(){return temperature;}
+		T getDensity(){return density / 1e9;}
 };
 
 
 
 
 //this class handles the specific calibration of temperature data
+template <class T>
 class TempCalibration {
 	private:
-		BigFloat maximum;
-		BigFloat baseline;
-		BigFloat maxPower;
-		BigFloat maxWavelength;
+		T maximum;
+		T baseline;
+		T maxPower;
+		T maxWavelength;
 
 	public:
-		TempCalibration(vector<DataPoint>& input, int sampleSize, BigFloat timeRange, BigFloat temperature){
+		TempCalibration(vector<DataPoint<T> >& input, int sampleSize, T timeRange, T temperature){
 			maximum = maxDataPoint(input, sampleSize);
 			baseline = findBaseline(input, timeRange);
-			PowerDensity maxDensity(maxWavelength, temperature);
+			PowerDensity<T> maxDensity(maxWavelength, temperature);
 			maxPower = maxDensity.getDensity();
 
 			cout << sampleSize * 2 << " point moving average" << endl;
@@ -162,19 +175,16 @@ class TempCalibration {
 		}
 
 		//needs to get the baseline for the measurement, and then find the max temperature
-		BigFloat maxDataPoint(vector<DataPoint>& input, int sampleSize){
+		T maxDataPoint(vector<DataPoint<T> >& input, int sampleSize){
 			int size = input.size();
-			BigFloat max = input[0].getPotential();
-			BigFloat peak = 0;
+			T max = input[0].getPotential();
+			T peak = 0;
 			for(int i = 1; i < size; i++){
-				BigFloat average = 0;
-				int count = 0;
 				//sum the numbers
-				for(int j = i - sampleSize; j >= 0 && j < i + sampleSize && j < size; j++){
-					average += input[j].getPotential();
-					count++;
-				}
-				average /= BigFloat(count);
+				Mean<T> meanObj;
+				for(int j = i - sampleSize; j >= 0 && j < i + sampleSize && j < size; j++) meanObj.push_back(input[j].getPotential());
+				T average(meanObj.mean());
+
 				if(average > max){
 					max = average;
 					peak = input[i].getWavelength();
@@ -184,8 +194,8 @@ class TempCalibration {
 			cout << "Peak Wavelength: " << peak << " nm" << endl;
 			return max;
 		}
-		BigFloat findBaseline(vector<DataPoint>& input, BigFloat timeRange){
-			BigFloat sum = 0;
+		T findBaseline(vector<DataPoint<T> >& input, T timeRange){
+			T sum = 0;
 			unsigned long int count = 0;
 			int size = input.size();
 			for(int i = 0; i < size; i++){
@@ -198,9 +208,9 @@ class TempCalibration {
 		}
 
 		//linear calibration, p=0 @ baseline and p = maxPower @ maximum
-		void calibrateDataPoints(vector<DataPoint>& input){
+		void calibrateDataPoints(vector<DataPoint<T> >& input){
 			int size = input.size();
-			BigFloat slope = maxPower / (maximum - baseline);
+			T slope = maxPower / (maximum - baseline);
 			for(int i = 0; i < size; i++){
 				input[i].setPower((input[i].getPotential() - baseline) * slope);
 			}
@@ -208,10 +218,11 @@ class TempCalibration {
 };
 
 
+template <class T>
 class InputFile {
 	private:
 		ifstream file;
-		vector<DataPoint> pointArray;
+		vector<DataPoint<T> > pointArray;
 	protected:
 		void fileToArray(){
 			//clear the array, go to the beginning of the file
@@ -233,7 +244,7 @@ class InputFile {
 				//break if any of the strings are empty (end of file)
 				if(isEmpty(time) || isEmpty(voltage) || isEmpty(angle)) break;
 
-				pointArray.emplace_back(BigFloat(time), BigFloat(voltage), BigFloat(angle));
+				pointArray.emplace_back(T(time), T(voltage), T(angle));
 			}
 		}
 
@@ -257,33 +268,34 @@ class InputFile {
 			file.close();
 		}
 
-		vector<DataPoint>& getPointArray(){return pointArray;}
+		vector<DataPoint<T> >& getPointArray(){return pointArray;}
 };
 
 
 
 //uses information about the light source to obtain the right blackbody spectrum
+template <class T>
 class PowerOutput {
 	private:
-		WiensLaw prediction;
-		BigFloat voltage;
-		BigFloat current;
-		BigFloat hotResistance;
-		BigFloat coldResistance;
-		BigFloat a0 = 4.5e-3;
-		BigFloat sigma = 5.67e-8;
+		WiensLaw<T> prediction;
+		T voltage;
+		T current;
+		T hotResistance;
+		T coldResistance;
+		T a0 = 4.5e-3;
+		T sigma = 5.67e-8;
 
-		BigFloat temp0;
-		BigFloat temperature;
-		BigFloat intensity;
+		T temp0;
+		T temperature;
+		T intensity;
 
-		BigFloat tempCalc(){
-			BigFloat resistRatio = hotResistance / coldResistance;
+		T tempCalc(){
+			T resistRatio = hotResistance / coldResistance;
 			return temp0 + (resistRatio - 1) / a0;
 		}
 
 	public:
-		PowerOutput(BigFloat resistance, BigFloat startingTemp, BigFloat inputVoltage, BigFloat inputCurrent){
+		PowerOutput(T resistance, T startingTemp, T inputVoltage, T inputCurrent){
 			voltage = inputVoltage;
 			current = inputCurrent;
 			coldResistance = resistance;
@@ -291,18 +303,18 @@ class PowerOutput {
 			temp0 = startingTemp;
 
 			temperature = tempCalc();
-			prediction = WiensLaw(temperature);
-			intensity = StefanBoltzmann::intensity(temperature);
+			prediction = WiensLaw<T>(temperature);
+			intensity = StefanBoltzmann<T>::intensity(temperature);
 		}
 
-		BigFloat getTemp(){return temperature;}
-		BigFloat getTemp0(){return temp0;}
-		BigFloat getHotResist(){return hotResistance;}
-		BigFloat getColdResist(){return coldResistance;}
-		BigFloat getVoltage(){return voltage;}
-		BigFloat getCurrent(){return current;}
-		BigFloat getWavelength(){return prediction.getWavelength();}
-		BigFloat getIntensity(){return intensity;}
+		T getTemp(){return temperature;}
+		T getTemp0(){return temp0;}
+		T getHotResist(){return hotResistance;}
+		T getColdResist(){return coldResistance;}
+		T getVoltage(){return voltage;}
+		T getCurrent(){return current;}
+		T getWavelength(){return prediction.getWavelength();}
+		T getIntensity(){return intensity;}
 };
 
 
@@ -326,21 +338,21 @@ int main(int argc, char ** argv){
 	}
 	cout.precision(10);
 
-	Calibration::setSlope(atof(args[8].c_str()));
-	Wavelength::setA(13900.0L);
-	Wavelength::setB(1.689L);
+	AngleCalibration<BigFloat>::setSlope(BigFloat(args[8]));
+	Wavelength<BigFloat>::setA(13900.0L);
+	Wavelength<BigFloat>::setB(1.689L);
 
 	//take the input file
-	InputFile rawFile(args[0]);
+	InputFile<BigFloat> rawFile(args[0]);
 	ofstream outputFile(args[1], ios::trunc);
-	vector<DataPoint> data = rawFile.getPointArray();
+	vector<DataPoint<BigFloat> > data = rawFile.getPointArray();
 
 	//find the WiensLaw stuff
 	BigFloat voltage(args[4]);
 	BigFloat current(args[5]);
 	BigFloat resistance(args[6]);
 	BigFloat temperature(args[7]);
-	PowerOutput power(resistance, temperature, voltage, current);
+	PowerOutput<BigFloat> power(resistance, temperature, voltage, current);
 
 	cout << "Temp:       " << power.getTemp() << endl;
 	cout << "Temp0:      " << power.getTemp0() << endl;
@@ -356,7 +368,7 @@ int main(int argc, char ** argv){
 	if(sampleSize <=0) sampleSize = 1;
 	BigFloat timeRange(args[3]);
 	BigFloat targetPower = power.getIntensity();
-	TempCalibration tempCal(data, sampleSize, timeRange, targetPower);
+	TempCalibration<BigFloat> tempCal(data, sampleSize, timeRange, targetPower);
 	tempCal.calibrateDataPoints(data);
 
 	//output the file
