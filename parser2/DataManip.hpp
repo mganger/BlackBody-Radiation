@@ -102,24 +102,18 @@ class Integrate {
 		}
 
 		void integration(){
-			typename std::vector<T>::iterator ot = integrated.begin();
+			auto ot = integrated.begin();
 			ot++;
-			for(typename std::vector<I>::iterator it = inputData->begin(); it != inputData->end(); it++){
-				T diff = (it+1)->independent() - it->independent();
+
+			for(auto it = inputData->begin(); it != inputData->end(); it++){
+				T diff = it[1].independent() - it[0].independent();
 
 				if(boost::math::isnan(diff.getNumber()) || diff == 0) continue;
 				if(boost::math::isinf(it->independent().getNumber())) continue;
 				if(boost::math::isinf((it+1)->independent().getNumber())) continue;
 
-				cout << std::setw(15) << it->independent() << ';';
-				cout << std::setw(15) << ot[-1] << " + ";
-				cout << std::setw(15) << diff << " * (";
-				cout << it->dependent() << " - ";
-				cout << offset << ")";
-
 				max = ot[-1] + diff * (it->dependent() - offset);
 				ot[0] = max;
-				cout << " = " << std::setw(15) << ot[0] << endl;
 				ot++;
 			}
 		}
@@ -154,8 +148,7 @@ class TempCalibration {
 			normalization = powerPerArea / normInt.getLast();
 			maxPower = normalization * (maxPower - baseline);
 
-			cout << "Integration max: " << normInt.getLast() << endl;
-			cout << "Calibration:     " << normalization << "W / m^2 / V" << endl;
+			cout << "Calibration:     " << normalization << " W / m^2 / V" << endl;
 
 			cout << sampleSize * 2 << " point moving average" << endl;
 			cout << "Max: " << maxPower << " W/m^2 at " << maxWavelength << " nm"<< endl;
@@ -163,24 +156,24 @@ class TempCalibration {
 
 		//needs to get the baseline for the measurement, and then find the max temperature
 		void maxDataPoint(std::vector<DataPoint<T> >& input, int sampleSize){
-			typename std::vector<DataPoint<T> >::iterator it,jt,maxt;
 			T max(0); 
 
-			for(it = input.begin(); it != input.end(); it++){
+			auto maxt = input.begin();
+			for(auto it = input.begin(); it != input.end(); it++){
 				//sum the numbers
 				Mean<T> meanObj;
-				for(jt = it - sampleSize; jt >= input.begin() && jt < it + sampleSize && jt < input.end(); jt++) meanObj.push_back(jt->getPotential());
+				for(auto jt = it - sampleSize; jt >= input.begin() && jt < it + sampleSize && jt < input.end(); jt++) meanObj.push_back(jt->getPotential());
 				if(meanObj.mean() > max) maxt = it;
 			}
 
 			//get the wavelength at that point
 			Mean<T> waveMean, voltMean;
-			for(jt = maxt - sampleSize; jt >= input.begin() && jt < maxt + sampleSize && jt < input.end(); jt++){
+			for(auto jt = maxt - sampleSize; jt >= input.begin() && jt < maxt + sampleSize && jt < input.end(); jt++){
 				waveMean.push_back(jt->getWavelength());
 				voltMean.push_back(jt->getPotential());
 			}
-			maxWavelength = T(waveMean.mean().getNumber(), waveMean.uncertainty().getNumber());
-			maxPower = T(voltMean.mean().getNumber(), voltMean.uncertainty().getNumber());
+			maxWavelength = T().merge(waveMean.mean(), waveMean.uncertainty());
+			maxPower = T().merge(voltMean.mean(), voltMean.uncertainty());
 		}
 
 		//find the average of the first n seconds
@@ -193,7 +186,7 @@ class TempCalibration {
 
 		//linear calibration, p=0 @ baseline and p = maxPower @ maximum
 		void calibrateDataPoints(std::vector<DataPoint<T> >& input){
-			for(typename std::vector<DataPoint<T> >::iterator it = input.begin(); it != input.end(); it++){
+			for(auto it = input.begin(); it != input.end(); it++){
 				it->setPower((it->getPotential() - baseline) * normalization);
 			}
 		}
