@@ -31,7 +31,7 @@ template <class T> T StefanBoltzmann<T>::sigma(5.67e-8);
 template <class T>
 class WiensLaw {
 	private:
-		T wConst = 2.89776829;
+		T wConst = 2.89776829e-3; //m * K
 		T temperature;
 		T wavelength;
 
@@ -42,7 +42,7 @@ class WiensLaw {
 			wavelength = wConst / temp;
 		}
 		T getTemp(){return temperature;}
-		T getWavelength(){return wavelength;}
+		T getWavelength(){return wavelength;} //in m
 };
 
 
@@ -52,10 +52,11 @@ template <class T>
 class PowerDensity {
 	private:
 		T pi = M_PI;
-		T h = 6.626e-34L;
-		T k = 5.67e-8L;
-		T c = 3e8L;
+		T h = 6.62606957e-34L; //J*s
+		T k = 5.670373e-8L;    // W/m^2 /K^4
+		T c = 299792458.0L;    // m/s
 
+		//in meters
 		T wavelength;
 		T temperature;
 		T density;
@@ -67,12 +68,14 @@ class PowerDensity {
 			return num / denum;
 		}
 	public:
+		//in nanometers
 		PowerDensity(T inputWavelength, T inputTemperature){
 			wavelength = inputWavelength * 1e-9;
 			temperature= inputTemperature;
 			density = densityCalc();
 		}
 
+		//in nanometers
 		T getWavelength(){return wavelength * 1e9;}
 		T getTemp(){return temperature;}
 		T getDensity(){return density / 1e9;}
@@ -105,14 +108,18 @@ class Integrate {
 			auto ot = integrated.begin();
 			ot++;
 
-			for(auto it = inputData->begin(); it != inputData->end(); it++){
-				T diff = it[1].independent() - it[0].independent();
+			for(auto it = inputData->begin(); it != (inputData->end() - 1); it++){
+				T h = it[1].independent() - it[0].independent();
 
-				if(boost::math::isnan(diff.getNumber()) || diff == 0) continue;
+				if(boost::math::isnan(h.getNumber()) || h == 0) continue;
 				if(boost::math::isinf(it->independent().getNumber())) continue;
 				if(boost::math::isinf((it+1)->independent().getNumber())) continue;
 
-				max = ot[-1] + diff * (it->dependent() - offset);
+				T b1 = it[0].dependent();
+				T b2 = it[1].dependent();
+
+				Trap<T> trap(b1 - offset,b2 - offset,h);
+				max = ot[-1] + trap.getArea();
 				ot[0] = max;
 				ot++;
 			}
@@ -206,7 +213,6 @@ class PowerOutput {
 		T hotResistance;
 		T coldResistance;
 		T a0;
-		T sigma;
 
 		T temp0;
 		T temperature;
@@ -220,7 +226,6 @@ class PowerOutput {
 	public:
 		PowerOutput(T resistance, T startingTemp, T inputVoltage, T inputCurrent){
 			a0 = 4.5e-3;
-			sigma = 5.67e-8;
 			voltage = inputVoltage;
 			current = inputCurrent;
 			coldResistance = resistance;
@@ -238,7 +243,7 @@ class PowerOutput {
 		T getColdResist(){return coldResistance;}
 		T getVoltage(){return voltage;}
 		T getCurrent(){return current;}
-		T getWavelength(){return prediction.getWavelength();}
+		T getWavelength(){return prediction.getWavelength() * 1e9;}
 		T getIntensity(){return intensity;}
 };
 //==========================================================================
