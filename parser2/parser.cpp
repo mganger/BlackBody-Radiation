@@ -17,6 +17,7 @@ using namespace boost::multiprecision;
 
 typedef cpp_dec_float_50 BigFloat;
 typedef Measurement< cpp_dec_float_50 > BigMeasure;
+
 template<>
 const char * Measurement<BigFloat>::printChar = ";";
 
@@ -38,7 +39,6 @@ int main(int argc, char ** argv){
 		cout << "input output samples timeRange voltage current resistance temperature slope" << endl;
 		exit(1);
 	}
-	cout.precision(3);
 
 	string inputName, outputName;
 	BigFloat samples(args[2]), timeRange(args[3]), voltage(args[4]), current(args[5]), resistance(args[6]), temperature(args[7]), slope(args[8]);
@@ -60,19 +60,19 @@ int main(int argc, char ** argv){
 	BigMeasure temperatureM(temperature);
 	PowerOutput<BigMeasure> power(resistanceM, temperatureM, voltageM, currentM);
 
-	cout << "Temp:       " << power.getTemp() << endl;
-	cout << "Temp0:      " << power.getTemp0() << endl;
-	cout << "HotResist:  " << power.getHotResist() << endl;
-	cout << "ColdResist: " << power.getColdResist() << endl;
-	cout << "Voltage:    " << power.getVoltage() << endl;
-	cout << "Current:    " << power.getCurrent() << endl;
-	cout << "Wavelength: " << power.getWavelength() << endl;
-	cout << "Intensity:  " << power.getIntensity() << endl << endl;
+	//output the pertinent information
+	cout << "Temp:       " << power.getTemp() << " K" << endl;
+	cout << "Temp0:      " << power.getTemp0() << " K" << endl;
+	cout << "HotResist:  " << power.getHotResist() << " Ω" << endl;
+	cout << "ColdResist: " << power.getColdResist() << " Ω" << endl;
+	cout << "Voltage:    " << power.getVoltage() << " V" << endl;
+	cout << "Current:    " << power.getCurrent() << " A" << endl;
+	cout << "Wavelength: " << power.getWavelength() << " nm" << endl;
+	cout << "Intensity:  " << power.getIntensity() << " W/m^2" << endl << endl;
 
-	//calibrate points
+	//calibrate data according to the temperature of the bulb, and the expected flux
 	int sampleSize = static_cast<int>(samples);
 	if(sampleSize <=0) sampleSize = 1;
-
 	BigMeasure timeRangeM(timeRange);
 	TempCalibration<BigMeasure> tempCal(data, sampleSize, timeRange, temperatureM);
 	tempCal.calibrateDataPoints(data);
