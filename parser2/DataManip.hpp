@@ -15,7 +15,7 @@
 using std::cout;
 using std::endl;
 
-
+//==========================================================================
 template <class T>
 class StefanBoltzmann {
 	public:
@@ -27,7 +27,7 @@ template <class T> T StefanBoltzmann<T>::sigma(5.67e-8);
 
 
 
-
+//==========================================================================
 template <class T>
 class WiensLaw {
 	private:
@@ -47,7 +47,7 @@ class WiensLaw {
 
 
 
-
+//==========================================================================
 template <class T>
 class PowerDensity {
 	private:
@@ -79,7 +79,7 @@ class PowerDensity {
 };
 
 
-
+//==========================================================================
 //note that the template class must implement independent() and dependent()
 template <class T>
 bool integrationCompare(T lhs, T rhs){return lhs.independent() < rhs.independent();}
@@ -122,7 +122,7 @@ class Integrate {
 		T getLast(){return max;}
 };
 
-
+//==========================================================================
 //this class handles the specific calibration of temperature data
 template <class T>
 class TempCalibration {
@@ -136,6 +136,7 @@ class TempCalibration {
 
 	public:
 		TempCalibration(std::vector<DataPoint<T> >& input, int sampleSize, T timeRange, T temperature){
+			//find the baseline and peak (based on time)
 			maxDataPoint(input, sampleSize);
 			findBaseline(input, timeRange);
 
@@ -148,10 +149,10 @@ class TempCalibration {
 			normalization = powerPerArea / normInt.getLast();
 			maxPower = normalization * (maxPower - baseline);
 
-			cout << "Calibration:     " << normalization << " W / m^2 / V" << endl;
-
+			//output information to the shell
+			cout << "Calibration:     " << normalization << " W/m^2 / V" << endl;
 			cout << sampleSize * 2 << " point moving average" << endl;
-			cout << "Max: " << maxPower << " W/m^2 at " << maxWavelength << " nm"<< endl;
+			cout << "Max: " << maxPower << " W/m^2 / nm at " << maxWavelength << " nm"<< endl;
 		}
 
 		//needs to get the baseline for the measurement, and then find the max temperature
@@ -194,7 +195,7 @@ class TempCalibration {
 
 
 
-
+//==========================================================================
 //uses information about the light source to obtain the right blackbody spectrum
 template <class T>
 class PowerOutput {
@@ -240,6 +241,6 @@ class PowerOutput {
 		T getWavelength(){return prediction.getWavelength();}
 		T getIntensity(){return intensity;}
 };
-
+//==========================================================================
 
 #endif

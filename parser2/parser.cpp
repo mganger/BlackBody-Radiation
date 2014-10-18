@@ -17,6 +17,8 @@ using namespace boost::multiprecision;
 
 typedef cpp_dec_float_50 BigFloat;
 typedef Measurement< cpp_dec_float_50 > BigMeasure;
+template<>
+const char * Measurement<BigFloat>::printChar = ";";
 
 //parse the input arguments to a string array
 vector<string> toStringArray(int argc, char ** argv){
@@ -77,14 +79,15 @@ int main(int argc, char ** argv){
 
 	//output the file
 	cout << endl << "Outputting to file in form:" << endl;
-	cout << "Time(s); Voltage(V); CalibratedAngle(°); Wavelength(nm); Intensity(W/m^2 / nm)" << endl;
+	cout << left << setw(30) << "Time(s);" << setw(30) << "Voltage(V);" << setw(30) << "CalibratedAngle(°);" << setw(30) << "Wavelength(nm);" << setw(30) << "Intensity(W/m^2 / nm)" << endl;
 	int size = data.size();
 	outputFile.precision(10);
+	outputFile << left;
 	for(int j = 0; j < size; j++){
-		outputFile << data[j].getTime() << ';';
-		outputFile << data[j].getPotential() << ';';
-		outputFile << data[j].getAngle() << ';';
-		outputFile << data[j].getWavelength() << ';';
-		outputFile << data[j].getPower() << endl;
+		outputFile << setw(30) << data[j].getTime() << ';';
+		outputFile << setw(30) << data[j].getPotential() << ';';
+		outputFile << setw(30) << data[j].getAngle() << ';';
+		outputFile << setw(30) << data[j].getWavelength() << ';';
+		outputFile << setw(30) << data[j].getPower() << endl;
 	}
 }
