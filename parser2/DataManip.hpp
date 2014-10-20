@@ -10,126 +10,12 @@
 #include <boost/math/special_functions/fpclassify.hpp>
 #include "Measurement-Type/Measurement.hpp"
 #include "Stats.hpp"
+#include "Laws.hpp"
 #include "DataPoint.hpp"
 
 using std::cout;
 using std::endl;
 
-//==========================================================================
-template <class T>
-class StefanBoltzmann {
-	public:
-		static T sigma;
-		static T intensity(T temp){return sigma * pow(temp, 4);}
-};
-
-template <class T> T StefanBoltzmann<T>::sigma(5.67e-8);
-
-
-
-//==========================================================================
-template <class T>
-class WiensLaw {
-	private:
-		T wConst = 2.89776829e-3; //m * K
-		T temperature;
-		T wavelength;
-
-	public:
-		WiensLaw(){};
-		WiensLaw(T temp){
-			temperature = temp;
-			wavelength = wConst / temp;
-		}
-		T getTemp(){return temperature;}
-		T getWavelength(){return wavelength;} //in m
-};
-
-
-
-//==========================================================================
-template <class T>
-class PowerDensity {
-	private:
-		T pi = M_PI;
-		T h = 6.62606957e-34L; //J*s
-		T k = 5.670373e-8L;    // W/m^2 /K^4
-		T c = 299792458.0L;    // m/s
-
-		//in meters
-		T wavelength;
-		T temperature;
-		T density;
-
-		T densityCalc(){
-			T num, denum;
-			num = 2 * pi * h * c*c;
-			denum = pow(wavelength, 5) * (exp((h*c) / (wavelength * k * temperature)) - 1);
-			return num / denum;
-		}
-	public:
-		//in nanometers
-		PowerDensity(T inputWavelength, T inputTemperature){
-			wavelength = inputWavelength * 1e-9;
-			temperature= inputTemperature;
-			density = densityCalc();
-		}
-
-		//in nanometers
-		T getWavelength(){return wavelength * 1e9;}
-		T getTemp(){return temperature;}
-		T getDensity(){return density / 1e9;}
-};
-
-
-//==========================================================================
-//note that the template class must implement independent() and dependent()
-template <class T>
-bool integrationCompare(T lhs, T rhs){return lhs.independent() < rhs.independent();}
-
-//I = input, T = output
-template <class I, class T>
-class Integrate {
-	private:
-		std::vector<T> integrated;
-		std::vector<I> * inputData;
-		T offset;
-		T max;
-
-	public:
-		Integrate(std::vector<I>& input, T inputOffset){
-			std::sort(input.begin(), input.end(), integrationCompare<I>);
-			inputData = &input;
-			integrated = std::vector<T>(input.size(), 0);
-			offset = inputOffset;
-		}
-
-		void integration(){
-			auto ot = integrated.begin();
-			ot++;
-
-			for(auto it = inputData->begin(); it != (inputData->end() - 1); it++){
-				T h = it[1].independent() - it[0].independent();
-
-				if(boost::math::isnan(h.getNumber()) || h == 0) continue;
-				if(boost::math::isinf(it->independent().getNumber())) continue;
-				if(boost::math::isinf((it+1)->independent().getNumber())) continue;
-
-				T b1 = it[0].dependent();
-				T b2 = it[1].dependent();
-
-				Trap<T> trap(b1 - offset,b2 - offset,h);
-				max = ot[-1] + trap.getArea();
-				ot[0] = max;
-				ot++;
-			}
-		}
-
-		std::vector<T>& getOutput(){return integrated;}
-		T getLast(){return max;}
-};
-
-//==========================================================================
 //this class handles the specific calibration of temperature data
 template <class T>
 class TempCalibration {
@@ -144,8 +30,8 @@ class TempCalibration {
 	public:
 		TempCalibration(std::vector<DataPoint<T> >& input, int sampleSize, T timeRange, T temperature){
 			//find the baseline and peak (based on time)
-			maxDataPoint(input, sampleSize);
 			findBaseline(input, timeRange);
+			maxDataPoint(input, sampleSize);
 
 			//perform integration
 			Integrate< DataPoint<T>, T > normInt(input, baseline);
@@ -153,11 +39,12 @@ class TempCalibration {
 
 			//perform normalization based on temperature
 			powerPerArea = StefanBoltzmann<T>::intensity(temperature);
+			//W/m^2 /nm /V  =  W/m^2       /     V*nm
 			normalization = powerPerArea / normInt.getLast();
 			maxPower = normalization * (maxPower - baseline);
 
 			//output information to the shell
-			cout << "Calibration:     " << normalization << " W/m^2 / V" << endl;
+			cout << "Calibration: " << normalization << " W/m^2 / V" << endl;
 			cout << sampleSize * 2 << " point moving average" << endl;
 			cout << "Max: " << maxPower << " W/m^2 / nm at " << maxWavelength << " nm"<< endl;
 		}
@@ -171,7 +58,10 @@ class TempCalibration {
 				//sum the numbers
 				Mean<T> meanObj;
 				for(auto jt = it - sampleSize; jt >= input.begin() && jt < it + sampleSize && jt < input.end(); jt++) meanObj.push_back(jt->getPotential());
-				if(meanObj.mean() > max) maxt = it;
+				if(meanObj.mean() > max){
+					maxt = it;
+					max = meanObj.mean();
+				}
 			}
 
 			//get the wavelength at that point
@@ -189,7 +79,7 @@ class TempCalibration {
 			Mean<T> mean;
 			if(input.empty());
 			for(auto it = input.begin(); it->getTime() < timeRange && it != input.end(); it++) mean.push_back(it->getPotential());
-			baseline = T(mean.mean().getNumber(), mean.uncertainty().getNumber());
+			baseline = T().merge(mean.mean(), mean.stdDev());
 		}
 
 		//linear calibration, p=0 @ baseline and p = maxPower @ maximum
@@ -202,7 +92,6 @@ class TempCalibration {
 
 
 
-//==========================================================================
 //uses information about the light source to obtain the right blackbody spectrum
 template <class T>
 class PowerOutput {
@@ -245,7 +134,7 @@ class PowerOutput {
 		T getCurrent(){return current;}
 		T getWavelength(){return prediction.getWavelength() * 1e9;}
 		T getIntensity(){return intensity;}
+		T getPeakDensity(){return PowerDensity<T>(prediction.getWavelength(),temperature).getDensity() / 1e9;}
 };
-//==========================================================================
 
 #endif
