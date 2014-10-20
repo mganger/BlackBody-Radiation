@@ -69,6 +69,7 @@ int main(int argc, char ** argv){
 	cout << "Current:    " << power.getCurrent() << " A" << endl;
 	cout << "Wavelength: " << power.getWavelength() << " nm" << endl;
 	cout << "Intensity:  " << power.getIntensity() << " W/m^2" << endl << endl;
+	cout << "Density:    " << power.getPeakDensity() << " W/m^2 / nm at "<< power.getWavelength() << endl << endl;
 
 	//calibrate data according to the temperature of the bulb, and the expected flux
 	int sampleSize = static_cast<int>(samples);
