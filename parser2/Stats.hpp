@@ -43,13 +43,10 @@ class Mean : public std::vector<T> {
 template <class T>
 class Trap {
 		T area;
-		T error;
 	public:
-		T getArea(){return area.merge(area, error);}
+		T getArea(){return area;}
 		Trap(T b1, T b2, T h){
 			area = h * 0.5 * (b1 + b2);
-			T diff = b1 - b2;
-			error = h * sqrt(diff * diff);
 		}
 };
 

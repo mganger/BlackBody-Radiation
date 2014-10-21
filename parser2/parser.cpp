@@ -75,7 +75,7 @@ int main(int argc, char ** argv){
 	int sampleSize = static_cast<int>(samples);
 	if(sampleSize <=0) sampleSize = 1;
 	BigMeasure timeRangeM(timeRange);
-	TempCalibration<BigMeasure> tempCal(data, sampleSize, timeRange, temperatureM);
+	TempCalibration<BigMeasure> tempCal(data, sampleSize, timeRange, power.getTemp());
 	tempCal.calibrateDataPoints(data);
 
 	//output the file

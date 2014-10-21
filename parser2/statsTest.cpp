@@ -35,7 +35,7 @@ int main(){
 
 	//test the integration library
 	vector<Integrateable> testVect;
-	for(int i = 0; i < 40; i++) testVect.emplace_back(i,i*i);
+	for(int i = 0; i < 40; i++) testVect.emplace_back(i,i);
 	Integrate<Integrateable,Measurement<double> > testInt(testVect, Measurement<double>(0));
 	testInt.integration();
 
