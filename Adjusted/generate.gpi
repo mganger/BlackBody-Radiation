@@ -1,0 +1,37 @@
+set datafile separator ';'
+set ylabel "Intensity (W/m^2 / nm)"
+set xlabel "Wavelength (nm)"
+set terminal pdf size 10.5, 8
+set xrange [0:4000]
+
+set output "10Vtrial9.pdf"
+plot "../Adjusted/10Vtrial9.csv" using 7:9
+unset output
+
+set output "5Vtrial1.pdf"
+plot "../Adjusted/5Vtrial1.csv" using 7:9
+unset output
+
+set output "5Vtrial2.pdf"
+plot "../Adjusted/5Vtrial2.csv" using 7:9
+unset output
+
+set output "5Vtrial4.pdf"
+plot "../Adjusted/5Vtrial4.csv" using 7:9
+unset output
+
+set output "6Vtrial3.pdf"
+plot "../Adjusted/6Vtrial3.csv" using 7:9
+unset output
+
+set output "7Vtrial6.pdf"
+plot "../Adjusted/7Vtrial6.csv" using 7:9
+unset output
+
+set output "8Vtrial7.pdf"
+plot "../Adjusted/8Vtrial7.csv" using 7:9
+unset output
+
+set output "9Vtrial8.pdf"
+plot "../Adjusted/9Vtrial8.csv" using 7:9
+unset output
