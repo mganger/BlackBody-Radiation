@@ -88,7 +88,6 @@ class Integrate {
 				Trap<T> trap(b1 - offset,b2 - offset,h);
 				max = ot[-1] + trap.getArea();
 				ot[0] = max;
-				cout << max << endl;
 				ot++;
 			}
 		}
