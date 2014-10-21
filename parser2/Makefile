@@ -1,4 +1,4 @@
-cppFiles = parser.cpp statsTest.cpp
+cppFiles = parser.cpp statsTest.cpp DataPointTest.cpp
 hppFiles = $(wildcard *.hpp)
 
 all: $(cppFiles:.cpp=) 

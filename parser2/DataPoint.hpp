@@ -32,7 +32,7 @@ class Wavelength {
 		static T A;
 		static T B;
 
-	protected:
+	public:
 		//methods
 		static T n(T theta){
 			T squared =  sin(toRadians(theta)) * 2.0/sqrt(3) + 1.0/2.0;
@@ -42,7 +42,6 @@ class Wavelength {
 		static T toWavelength(T theta){
 			return sqrt(A / (n(theta) - B));
 		}
-	public:
 		static void setA(T inputA){A = inputA;}
 		static void setB(T inputB){B = inputB;}
 };
