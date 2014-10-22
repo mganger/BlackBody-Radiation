@@ -75,20 +75,20 @@ int main(int argc, char ** argv){
 	int sampleSize = static_cast<int>(samples);
 	if(sampleSize <=0) sampleSize = 1;
 	BigMeasure timeRangeM(timeRange);
-	TempCalibration<BigMeasure> tempCal(data, sampleSize, timeRange, power.getTemp());
+	TempCalibration<BigMeasure> tempCal(data, sampleSize, timeRange, power);
 	tempCal.calibrateDataPoints(data);
 
 	//output the file
 	cout << endl << "Outputting to file in form:" << endl;
 	cout << left << setw(30) << "Time(s);" << setw(30) << "Voltage(V);" << setw(30) << "CalibratedAngle(°);" << setw(30) << "Wavelength(nm);" << setw(30) << "Intensity(W/m^2 / nm)" << endl;
-	int size = data.size();
 	outputFile.precision(10);
 	outputFile << left;
-	for(int j = 0; j < size; j++){
-		outputFile << setw(30) << data[j].getTime() << ';';
-		outputFile << setw(30) << data[j].getPotential() << ';';
-		outputFile << setw(30) << data[j].getAngle() << ';';
-		outputFile << setw(30) << data[j].getWavelength() << ';';
-		outputFile << setw(30) << data[j].getPower() << endl;
+	outputFile << "Time; Potential; Angle; Wavelength; Intensity" << endl;
+	for(auto it = data.begin(); it != data.end(); it++){
+		outputFile << setw(30) << it->getTime() << ';';
+		outputFile << setw(30) << it->getPotential() << ';';
+		outputFile << setw(30) << it->getAngle() << ';';
+		outputFile << setw(30) << it->getWavelength() << ';';
+		outputFile << setw(30) << it->getPower() << endl;
 	}
 }
