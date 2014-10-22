@@ -13,7 +13,7 @@ class StefanBoltzmann {
 		static T intensity(T temp){return sigma * pow(temp, 4);}
 };
 
-template <class T> T StefanBoltzmann<T>::sigma(5.67e-8);
+template <class T> T StefanBoltzmann<T>::sigma(5.670373e-8);
 
 
 
