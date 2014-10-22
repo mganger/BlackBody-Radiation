@@ -20,7 +20,7 @@ class Integrateable {
 int main(){
 	//test the stats library
 	Mean<double> test;
-	for(int i = 0; i < 100; i++) test.push_back(i);
+	for(int i = 0; i < 100; i++) test.push_back(100);
 
 	cout << "Mean:        " << test.mean() << endl;
 	cout << "Variance:    " << test.variance() << endl;
