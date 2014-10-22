@@ -16,6 +16,51 @@
 using std::cout;
 using std::endl;
 
+//uses information about the light source to obtain the right blackbody spectrum
+template <class T>
+class PowerOutput {
+	private:
+		WiensLaw<T> prediction;
+		T voltage;
+		T current;
+		T hotResistance;
+		T coldResistance;
+		T a0;
+
+		T temp0;
+		T temperature;
+		T intensity;
+
+		T tempCalc(){
+			T resistRatio = hotResistance / coldResistance;
+			return temp0 + (resistRatio - 1) / a0;
+		}
+
+	public:
+		PowerOutput(T resistance, T startingTemp, T inputVoltage, T inputCurrent){
+			a0 = 4.5e-3;
+			voltage = inputVoltage;
+			current = inputCurrent;
+			coldResistance = resistance;
+			hotResistance = voltage / current;
+			temp0 = startingTemp;
+
+			temperature = tempCalc();
+			prediction = WiensLaw<T>(temperature);
+			intensity = StefanBoltzmann<T>::intensity(temperature);
+		}
+
+		T getTemp(){return temperature;}
+		T getTemp0(){return temp0;}
+		T getHotResist(){return hotResistance;}
+		T getColdResist(){return coldResistance;}
+		T getVoltage(){return voltage;}
+		T getCurrent(){return current;}
+		T getWavelength(){return prediction.getWavelength() * 1e9;}
+		T getIntensity(){return intensity;}
+		T getPeakDensity(){return PowerDensity<T>(prediction.getWavelength(),temperature).getDensity() / 1e9;}
+};
+
 //this class handles the specific calibration of temperature data
 template <class T>
 class TempCalibration {
@@ -28,7 +73,7 @@ class TempCalibration {
 		T powerPerArea;
 
 	public:
-		TempCalibration(std::vector<DataPoint<T> >& input, int sampleSize, T timeRange, T temperature){
+		TempCalibration(std::vector<DataPoint<T> >& input, int sampleSize, T timeRange, PowerOutput<T> power){
 			//find the baseline and peak (based on time)
 			findBaseline(input, timeRange);
 			maxDataPoint(input, sampleSize);
@@ -38,7 +83,7 @@ class TempCalibration {
 			normInt.integration();
 
 			//perform normalization based on temperature
-			powerPerArea = StefanBoltzmann<T>::intensity(temperature);
+			powerPerArea = StefanBoltzmann<T>::intensity(power.getTemp());
 			//W/m^2 /nm /V  =  W/m^2       /     V*nm
 			normalization = powerPerArea / normInt.getLast();
 			maxPower = normalization * (maxPower - baseline);
@@ -91,50 +136,5 @@ class TempCalibration {
 };
 
 
-
-//uses information about the light source to obtain the right blackbody spectrum
-template <class T>
-class PowerOutput {
-	private:
-		WiensLaw<T> prediction;
-		T voltage;
-		T current;
-		T hotResistance;
-		T coldResistance;
-		T a0;
-
-		T temp0;
-		T temperature;
-		T intensity;
-
-		T tempCalc(){
-			T resistRatio = hotResistance / coldResistance;
-			return temp0 + (resistRatio - 1) / a0;
-		}
-
-	public:
-		PowerOutput(T resistance, T startingTemp, T inputVoltage, T inputCurrent){
-			a0 = 4.5e-3;
-			voltage = inputVoltage;
-			current = inputCurrent;
-			coldResistance = resistance;
-			hotResistance = voltage / current;
-			temp0 = startingTemp;
-
-			temperature = tempCalc();
-			prediction = WiensLaw<T>(temperature);
-			intensity = StefanBoltzmann<T>::intensity(temperature);
-		}
-
-		T getTemp(){return temperature;}
-		T getTemp0(){return temp0;}
-		T getHotResist(){return hotResistance;}
-		T getColdResist(){return coldResistance;}
-		T getVoltage(){return voltage;}
-		T getCurrent(){return current;}
-		T getWavelength(){return prediction.getWavelength() * 1e9;}
-		T getIntensity(){return intensity;}
-		T getPeakDensity(){return PowerDensity<T>(prediction.getWavelength(),temperature).getDensity() / 1e9;}
-};
 
 #endif
