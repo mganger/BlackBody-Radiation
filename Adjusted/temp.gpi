@@ -1,3 +1,9 @@
+temp5V = 2762.56
+temp6V = 3012.32
+temp7V = 3221.13
+temp8V = 3398.31
+temp9V = 3600.21
+temp10V = 3780.28
 set datafile separator ';'
 set ylabel "Intensity (W/m^2 / nm)"
 set xlabel "Wavelength (nm)"

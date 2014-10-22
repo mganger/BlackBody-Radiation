@@ -85,8 +85,9 @@ class TempCalibration {
 			//perform normalization based on temperature
 			powerPerArea = StefanBoltzmann<T>::intensity(power.getTemp());
 			//W/m^2 /nm /V  =  W/m^2       /     V*nm
-			normalization = powerPerArea / normInt.getLast();
-			maxPower = normalization * (maxPower - baseline);
+			T theoryPeak = power.getPeakDensity();
+			normalization = theoryPeak / (maxPower - baseline);
+			//maxPower = normalization * (maxPower - baseline);
 
 			//output information to the shell
 			cout << "Calibration: " << normalization << " W/m^2 / V" << endl;

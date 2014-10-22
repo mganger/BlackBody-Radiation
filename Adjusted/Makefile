@@ -43,3 +43,6 @@ clean:
 
 view: 
 	evince graphs/*.pdf
+
+merge: graph
+	pdfmerge graphs/*.pdf merged.pdf
