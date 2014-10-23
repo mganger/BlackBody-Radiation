@@ -87,9 +87,10 @@ class TempCalibration {
 			//W/m^2 /nm /V  =  W/m^2       /     V*nm
 			T theoryPeak = power.getPeakDensity();
 			normalization = theoryPeak / (maxPower - baseline);
-			//maxPower = normalization * (maxPower - baseline);
+			maxPower = normalization * (maxPower - baseline);
 
 			//output information to the shell
+			cout << "Integration: " << normInt.getLast()*normalization << endl;
 			cout << "Calibration: " << normalization << " W/m^2 / V" << endl;
 			cout << sampleSize * 2 << " point moving average" << endl;
 			cout << "Max: " << maxPower << " W/m^2 / nm at " << maxWavelength << " nm"<< endl;
