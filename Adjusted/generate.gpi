@@ -59,8 +59,10 @@ plot "../Adjusted/9Vtrial8.csv" using 7:9:10 with errorbars, R(x,temp9V) lw 2 lc
 unset output
 
 set autoscale 
+set title "Wiens Law vs Observation"
 set xlabel "Temperature (K)"
 set ylabel "Wavelength (nm)"
 set output "WiensLaw.pdf"
-plot "Wien.dat" using 5:2 with lines, "Wien.dat" using 5:3:4 with errorbars
+wien(T) = 1e9 * 2.9e-3 / T
+plot wien(x) lt 2 lc rgb "#000000", "Wien.dat" using 5:3:4 with errorbars lc rgb "#000000"
 unset output
