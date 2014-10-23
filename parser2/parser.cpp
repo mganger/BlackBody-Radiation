@@ -44,7 +44,8 @@ int main(int argc, char ** argv){
 	BigFloat samples(args[2]), timeRange(args[3]), voltage(args[4]), current(args[5]), resistance(args[6]), temperature(args[7]), slope(args[8]);
 	BigFloat a(13900.0), b(1.689);
 
-	AngleCalibration<BigMeasure>::setSlope(slope);
+	BigMeasure angleConversion(slope,(BigFloat).0026);
+	AngleCalibration<BigMeasure>::setSlope(angleConversion);
 	Wavelength<BigMeasure>::setA(a);
 	Wavelength<BigMeasure>::setB(b);
 
