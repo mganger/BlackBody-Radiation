@@ -10,5 +10,15 @@ stats: statsTest
 
 resist: resist2temp
 
+wien: WiensLaw
+	touch Wien.dat
+	rm Wien.dat
+	./WiensLaw .81 295 5 .51
+	./WiensLaw .81 295 6 .56
+	./WiensLaw .81 295 7 .61
+	./WiensLaw .81 295 8 .66
+	./WiensLaw .81 295 9 .70
+	./WiensLaw .81 295 10 .74
+
 %: %.cpp $(hppFiles)
 	g++ -O3 -std=c++11 -Wall -Werror $< -o $@

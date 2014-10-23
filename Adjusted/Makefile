@@ -4,7 +4,7 @@ resistance = .81
 roomTemp = 295.094
 movingAvg = 2
 
-graph: clean generate
+graph:clean generate
 	echo temp5V =  $(shell ../parser2/resist2temp $(resistance) $(roomTemp) 5 0.51) >> temp.gpi
 	echo temp6V =  $(shell ../parser2/resist2temp $(resistance) $(roomTemp) 6 0.56) >> temp.gpi
 	echo temp7V =  $(shell ../parser2/resist2temp $(resistance) $(roomTemp) 7 0.61) >> temp.gpi
@@ -13,8 +13,15 @@ graph: clean generate
 	echo temp10V = $(shell ../parser2/resist2temp $(resistance) $(roomTemp) 10 0.74) >> temp.gpi
 	cat generate.gpi >> temp.gpi
 	gnuplot temp.gpi
-	rm temp.gpi
 	mv *.pdf graphs
+
+hack:
+	echo temp5V =  $(shell ../parser2/resist2temp $(resistance) $(roomTemp) 5 0.51) >>  Wien.dat 
+	echo temp6V =  $(shell ../parser2/resist2temp $(resistance) $(roomTemp) 6 0.56) >>  Wien.dat 
+	echo temp7V =  $(shell ../parser2/resist2temp $(resistance) $(roomTemp) 7 0.61) >>  Wien.dat 
+	echo temp8V =  $(shell ../parser2/resist2temp $(resistance) $(roomTemp) 8 0.66) >>  Wien.dat 
+	echo temp9V =  $(shell ../parser2/resist2temp $(resistance) $(roomTemp) 9 0.70) >>  Wien.dat 
+	echo temp10V = $(shell ../parser2/resist2temp $(resistance) $(roomTemp) 10 0.74) >> Wien.dat 
 
 generate: 10Vtrial9.csv 9Vtrial8.csv 8Vtrial7.csv 7Vtrial6.csv 5Vtrial4.csv 5Vtrial2.csv 5Vtrial2.csv 6Vtrial3.csv 5Vtrial1.csv
 
