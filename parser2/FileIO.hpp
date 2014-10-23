@@ -37,7 +37,7 @@ class InputFile {
 				//break if any of the strings are empty (end of file)
 				if(isEmpty(time) || isEmpty(voltage) || isEmpty(angle)) break;
 
-				pointArray.emplace_back(atof(time.c_str()), atof(voltage.c_str()), atof(angle.c_str()));
+				pointArray.emplace_back(atof(time.c_str()), T(atof(voltage.c_str()),0.05), atof(angle.c_str()));
 			}
 		}
 

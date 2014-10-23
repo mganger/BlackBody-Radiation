@@ -54,10 +54,10 @@ int main(int argc, char ** argv){
 	vector<DataPoint<BigMeasure> > data = rawFile.getPointArray();
 
 	//find the WiensLaw stuff
-	BigMeasure voltageM(voltage);
-	BigMeasure currentM(current);
-	BigMeasure resistanceM(resistance);
-	BigMeasure temperatureM(temperature);
+	BigMeasure voltageM(voltage, 0.05);
+	BigMeasure currentM(current, 0.005);
+	BigMeasure resistanceM(resistance, 0.005);
+	BigMeasure temperatureM(temperature, 2.0);
 	PowerOutput<BigMeasure> power(resistanceM, temperatureM, voltageM, currentM);
 
 	//output the pertinent information
