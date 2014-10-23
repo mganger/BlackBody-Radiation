@@ -13,6 +13,7 @@ graph:clean generate
 	echo temp10V = $(shell ../parser2/resist2temp $(resistance) $(roomTemp) 10 0.74) >> temp.gpi
 	cat generate.gpi >> temp.gpi
 	gnuplot temp.gpi
+	rm temp.gpi
 	mv *.pdf graphs
 
 hack:
@@ -24,6 +25,8 @@ hack:
 	echo temp10V = $(shell ../parser2/resist2temp $(resistance) $(roomTemp) 10 0.74) >> Wien.dat 
 
 generate: 10Vtrial9.csv 9Vtrial8.csv 8Vtrial7.csv 7Vtrial6.csv 5Vtrial4.csv 5Vtrial2.csv 5Vtrial2.csv 6Vtrial3.csv 5Vtrial1.csv
+	sed -i".bak" '/nan/d' *.csv
+	rm *.bak
 
 10Vtrial9.csv:
 	$(parser) ../10Vtrial9.csv  10Vtrial9.csv $(movingAvg) 10 10 .74 $(resistance) $(roomTemp) $(slope)

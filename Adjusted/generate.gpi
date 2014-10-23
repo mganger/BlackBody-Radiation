@@ -20,42 +20,42 @@ R(W,T) = 1e-9 * (2*pi*h*c*c) / ((W*1e-9)**5 * (exp((h*c)/((W*1e-9)*k*T))-1))
 
 set title "10V trial 9"
 set output "10Vtrial9.pdf"
-plot "../Adjusted/10Vtrial9.csv" using 7:9, R(x,temp10V)
+plot "../Adjusted/10Vtrial9.csv" using 7:9:10 with errorbars, R(x,temp10V) lw 2 lc rgb "#000000"
 unset output
 
 set title "5V trial 1"
 set output "5Vtrial1.pdf"
-plot "../Adjusted/5Vtrial1.csv" using 7:9, R(x,temp5V)
+plot "../Adjusted/5Vtrial1.csv" using 7:9:10 with errorbars, R(x,temp5V) lw 2 lc rgb "#000000"
 unset output
 
 set title "5V trial 2"
 set output "5Vtrial2.pdf"
-plot "../Adjusted/5Vtrial2.csv" using 7:9, R(x,temp5V)
+plot "../Adjusted/5Vtrial2.csv" using 7:9:10 with errorbars, R(x,temp5V) lw 2 lc rgb "#000000"
 unset output
 
 set title "5V trial 4"
 set output "5Vtrial4.pdf"
-plot "../Adjusted/5Vtrial4.csv" using 7:9, R(x,temp5V)
+plot "../Adjusted/5Vtrial4.csv" using 7:9:10 with errorbars, R(x,temp5V) lw 2 lc rgb "#000000"
 unset output
 
 set title "6V trial 3"
 set output "6Vtrial3.pdf"
-plot "../Adjusted/6Vtrial3.csv" using 7:9, R(x,temp6V)
+plot "../Adjusted/6Vtrial3.csv" using 7:9:10 with errorbars, R(x,temp6V) lw 2 lc rgb "#000000"
 unset output
 
 set title "7V trial 6"
 set output "7Vtrial6.pdf"
-plot "../Adjusted/7Vtrial6.csv" using 7:9, R(x,temp7V)
+plot "../Adjusted/7Vtrial6.csv" using 7:9:10 with errorbars, R(x,temp7V) lw 2 lc rgb "#000000"
 unset output
 
 set title "8V trial 7"
 set output "8Vtrial7.pdf"
-plot "../Adjusted/8Vtrial7.csv" using 7:9, R(x,temp8V)
+plot "../Adjusted/8Vtrial7.csv" using 7:9:10 with errorbars, R(x,temp8V) lw 2 lc rgb "#000000"
 unset output
 
 set title "9V trial 8"
 set output "9Vtrial8.pdf"
-plot "../Adjusted/9Vtrial8.csv" using 7:9, R(x,temp9V)
+plot "../Adjusted/9Vtrial8.csv" using 7:9:10 with errorbars, R(x,temp9V) lw 2 lc rgb "#000000"
 unset output
 
 set autoscale 
